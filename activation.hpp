@@ -1,7 +1,7 @@
 #pragma once
 
 /*
-	Activation functions, f and it's derivative df
+	Activation functions, f and its derivative df
 */
 struct Activation
 {
