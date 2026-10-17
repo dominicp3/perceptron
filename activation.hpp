@@ -8,3 +8,6 @@ struct Activation
 	double (*f)(double);
 	double (*df)(double);
 };
+
+double relu(double x);
+double dRelu(double x);

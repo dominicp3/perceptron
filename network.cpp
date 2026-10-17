@@ -2,7 +2,9 @@
 #include "vec.hpp"
 #include <algorithm>
 #include <stdexcept>
-#include <set>
+#include <numeric>
+#include <fstream>
+#include <iostream>
 
 Perceptron::Perceptron(int n_input, int m_output, const std::vector<int> &layer_config, Activation act):
 	n_input{n_input},
@@ -21,15 +23,70 @@ Perceptron::Perceptron(int n_input, int m_output, const std::vector<int> &layer_
 	layers_.push_back({layer_config.back(), m_output});
 }
 
+Perceptron::Perceptron(const std::string &file)
+{
+	std::ifstream in(file, std::ios::binary);
+
+	if (!in.is_open()) {
+		throw std::invalid_argument("loadFromFile: invalid file");
+	}
+
+	int rows;
+	int cols;
+	int sz;
+
+	std::vector<Layer> layers;
+
+	while (true) {
+		in.read(reinterpret_cast<char*>(&rows), sizeof rows);
+
+		if (in.gcount() == 0) {
+			if (in.eof()) {
+				break;
+			} else {
+				throw std::invalid_argument("error in reading file");
+			}
+		}
+
+		in.read(reinterpret_cast<char*>(&cols), sizeof cols);
+
+		sz = rows * cols;
+
+		std::vector<double> W_arr(sz);
+		in.read(reinterpret_cast<char*>(W_arr.data()), sz * sizeof (double));
+
+		Matrix W(rows, cols, std::move(W_arr));
+
+		std::vector<double> b(rows);
+		in.read(reinterpret_cast<char*>(b.data()), rows * sizeof (double));
+
+		Layer layer(cols, rows);
+		layer.W = std::move(W);
+		layer.b = std::move(b);
+
+		layers.emplace_back(std::move(layer));
+	}
+
+	if (layers.empty()) {
+		return;
+	}
+
+	n_input = layers.front().W.numCols();
+	m_output = layers.back().W.numRows();
+	act_ = {relu, dRelu};
+	layers_ = std::move(layers);
+}
+
 void Perceptron::fit(const std::vector<std::vector<double>> &X, const std::vector<int> &y, int epochs, double learning_rate, int batch_size)
 {
 	if (X.size() != y.size()) {
 		throw std::invalid_argument("fit: X and y have different sizes");
 	}
-	
-	std::mt19937_64 rng(rd_());
 
 	int N = (int) X.size();
+
+	std::random_device rd;
+	std::mt19937_64 rng(rd());
 
 	std::vector<std::size_t> idx(N);
 	std::iota(idx.begin(), idx.end(), 0);
@@ -129,6 +186,51 @@ void Perceptron::clearGradients()
 		layer.Wg.zero();
 		std::fill(layer.bg.begin(), layer.bg.end(), 0.0);
 	}
+}
+
+void Perceptron::saveToFile(const std::string &filename) const
+{
+	std::ofstream out(filename, std::ios::binary);
+
+	if (!out.is_open()) {
+		throw std::invalid_argument("saveToFile: invalid file");
+	}
+
+	for (const Layer &layer : layers_) {
+		auto [rows, cols] = layer.W.shape();
+		const auto *W_data = layer.W.data();
+		const auto *b_data = layer.b.data();
+
+		out.write(reinterpret_cast<const char*>(&rows), sizeof rows);
+		out.write(reinterpret_cast<const char*>(&cols), sizeof cols);
+
+		int sz = rows * cols;
+
+		out.write(reinterpret_cast<const char*>(W_data), sz * sizeof *W_data);
+		out.write(reinterpret_cast<const char*>(b_data), rows * sizeof *b_data);
+	}
+}
+
+bool Perceptron::equalParams(const Perceptron &other) const
+{
+	if (layers_.size() != other.layers_.size()) {
+		std::cout << "layer size\n";
+		return false;
+	}
+
+	for (std::size_t i = 0; i < layers_.size(); ++i) {
+		if (layers_[i].W != other.layers_[i].W) {
+			std::cout << "W: " << i << '\n';
+			return false;
+		}
+
+		if (layers_[i].b != other.layers_[i].b) {
+			std::cout << "b: " << i << '\n';
+			return false;
+		}
+	}
+
+	return true;
 }
 
 const Layer &Perceptron::getLayer(int layer) const

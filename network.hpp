@@ -2,6 +2,7 @@
 #include <vector>
 #include <cmath>
 #include <random>
+#include <string>
 #include "matrix.hpp"
 #include "activation.hpp"
 
@@ -48,7 +49,12 @@ public:
 		m_output: size of output vector
 		layer_config: vector of int specifying the input size of each hidden layer
 	*/
-	Perceptron(int n_input, int m_output, const std::vector<int> &layer_config, Activation act);
+	Perceptron(int n_input, int m_output, const std::vector<int> &layer_config, Activation act = {relu, dRelu});
+
+	/*
+		load a perceptron from a config file
+	*/
+	Perceptron(const std::string &file);
 
 	void fit(const std::vector<std::vector<double>> &X, const std::vector<int> &y, int epochs = 2, double learning_rate=0.01, int batch_size = 1);
 
@@ -73,6 +79,9 @@ public:
 	/* zero out the accumulators to ready for next update */
 	void clearGradients();
 
+	void saveToFile(const std::string &filename) const;
+
+	bool equalParams(const Perceptron &other) const;
 	const Layer &getLayer(int layer) const;
 	const Matrix &getWeights(int layer) const;
 	const std::vector<double> &getBiases(int layer) const;
@@ -89,6 +98,4 @@ private:
 	Activation act_;
 
 	std::vector<Layer> layers_;
-
-	std::random_device rd_;
 };

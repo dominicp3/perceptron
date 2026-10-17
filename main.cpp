@@ -10,6 +10,8 @@
 #include <cstdint>
 #include <numeric>
 #include <cmath>
+#include <fstream>
+#include <string>
 
 std::random_device rd;
 
@@ -79,24 +81,6 @@ std::vector<int> loadLabels(const std::string &path)
 	}
 
 	return std::vector<int>(buf.begin(), buf.end());
-}
-
-double relu(double x)
-{
-	if (x > 0.0) {
-		return x;
-	}
-
-	return 0.0;
-}
-
-double dRelu(double x)
-{
-	if (x > 0.0) {
-		return 1.0;
-	}
-
-	return 0.0;
 }
 
 Dataset gaussian_blob(int n)
@@ -240,7 +224,7 @@ void fuck()
 	std::cout << "hit rate: " << 100 * hit_rate << '%' << '\n';
 }
 
-Dataset mnist_train()
+Dataset mnist_trainset()
 {
 	return {
 		loadImages("mnist/train-images.idx3-ubyte"),
@@ -249,7 +233,7 @@ Dataset mnist_train()
 	};
 }
 
-Dataset mnist_test()
+Dataset mnist_testset()
 {
 	return {
 		loadImages("mnist/t10k-images.idx3-ubyte"),
@@ -258,25 +242,125 @@ Dataset mnist_test()
 	};
 }
 
-void mnist_toy()
+Perceptron mnist_train(int epochs, double lr, int b, const std::vector<int> &config)
 {
-	auto [X_mnist_train, y_mnist_train, n_classes_mnist_train] = mnist_train();
-	auto [X_mnist_test, y_mnist_test, n_classes_mnist_test] = mnist_test();
+	auto [X_mnist_train, y_mnist_train, n_classes_mnist_train] = mnist_trainset();
 
-	Perceptron net((int) X_mnist_train.front().size(), n_classes_mnist_train, {256, 256}, {relu, dRelu});
+	Perceptron net((int) X_mnist_train.front().size(), n_classes_mnist_train, config, {relu, dRelu});
 
-	int epochs = 3;
-	double learning_rate = 0.1;
-	int batch_size = 128;
+	net.fit(X_mnist_train, y_mnist_train, epochs, lr, b);
 
-	net.fit(X_mnist_train, y_mnist_train, epochs, learning_rate, batch_size);
+	return net;
+}
 
+void mnist_test(Perceptron &net)
+{
+	auto [X_mnist_test, y_mnist_test, n_classes_mnist_test] = mnist_testset();
 	double hit_rate = test(net, {X_mnist_test, y_mnist_test, n_classes_mnist_test});
-
 	std::cout << "hit rate: " << 100 * hit_rate << '%' << '\n';
+}
+
+std::vector<double> mnist_single(std::string filename)
+{
+	std::ifstream file(filename);
+
+	if (!file) {
+		std::cerr << "Failed to open pixels.txt\n";
+	}
+
+	std::vector<double> pixels;
+	double value;
+
+	while (file >> value) {
+		pixels.push_back(value);
+	}
+
+	if (pixels.size() != 784) {
+		std::cerr << "Expected 784 pixels, got " << pixels.size() << '\n';
+	}
+
+	std::cout << "Loaded " << pixels.size() << " pixels\n";
+
+	return pixels;
 }
 
 int main()
 {
-	mnist_toy();
+	// int epochs = 20;
+	// double learning_rate = 0.005;
+	// int batch_size = 64;
+	// std::vector<int> config {256, 256};
+	// std::string mnist_file = "mnist_weights";
+	// Perceptron net = mnist_train(epochs, learning_rate, batch_size, config);
+	// net.saveToFile(mnist_file);
+
+
+
+	// Perceptron net("mnist_weights");
+	// mnist_test(net);
+
+
+
+	// mnist_test(net);
+
+
+	// Perceptron net_256("mnist_epoch20_lr005_b64_config256.256");
+	// Perceptron net_512("mnist_epoch40_lr005_b64_config512.512");
+
+	// std::cout << "512,512:\n";
+
+	// for (int k = 0; k < 10; ++k) {
+	// 	std::string digit_file = "digits/";
+	// 	digit_file += std::to_string(k);
+	// 	digit_file += ".png.txt";
+
+	// 	std::ifstream file(digit_file);
+	// 	std::vector<double> values;
+	// 	double x;
+
+	// 	while (file >> x) {
+	// 		values.push_back(x);
+	// 	}
+
+	// 	example_stats(net_512, values, k);
+	// }
+
+	// std::cout << "\n256,256:\n";
+
+	// for (int k = 0; k < 10; ++k) {
+	// 	std::string digit_file = "digits/";
+	// 	digit_file += std::to_string(k);
+	// 	digit_file += ".png.txt";
+
+	// 	std::ifstream file(digit_file);
+	// 	std::vector<double> values;
+	// 	double x;
+
+	// 	while (file >> x) {
+	// 		values.push_back(x);
+	// 	}
+
+	// 	example_stats(net_256, values, k);
+	// }
+
+
+	// std::cout << "\n512, 128:\n";
+
+	// for (int k = 0; k < 10; ++k) {
+	// 	std::string digit_file = "digits/";
+	// 	digit_file += std::to_string(k);
+	// 	digit_file += ".png.txt";
+
+	// 	std::ifstream file(digit_file);
+	// 	std::vector<double> values;
+	// 	double x;
+
+	// 	while (file >> x) {
+	// 		values.push_back(x);
+	// 	}
+
+	// 	example_stats(net, values, k);
+	// }
 }
+
+

@@ -9,11 +9,16 @@ class Matrix
 public:
 	Matrix(int n_rows, int m_cols, double value = 0.0);
 	Matrix(std::initializer_list<std::initializer_list<double>> rows);
+	Matrix(int n_rows, int m_cols, std::vector<double> &&arr);
 
 	static Matrix identity(int n);
 	static Matrix random(int n_rows, int m_cols, double lo=-1.0, double hi=1.0);
 
+	int numRows() const;
+	int numCols() const;
 	std::pair<int, int> shape() const;
+
+	const double *data() const;
 
 	double operator()(int i, int j) const;
 	double& operator()(int i, int j);
@@ -33,6 +38,10 @@ public:
 	Matrix operator/(double lambda) const;
 
 	Matrix &operator/=(double lambda);
+
+	bool operator==(const Matrix &other) const;
+
+	bool operator!=(const Matrix &other) const;
 	
 	Matrix transpose() const;
 
