@@ -269,16 +269,27 @@ std::vector<float> mnist_single(std::string filename)
 
 int main()
 {
-	// int epochs = 20;
-	// float learning_rate = 0.005;
-	// int batch_size = 64;
-	// std::vector<int> config {256, 256};
-	// std::string mnist_file = "mnist_weights/test";
+	// int epochs = 120;
+	// float learning_rate = 0.2;
+	// int batch_size = 1000;
+	// std::vector<int> config {512, 128};
+	// std::string mnist_file = "mnist_weights/mnist_epoch120_lr2_b1000_config512.128";
 	// Perceptron net = mnist_train(epochs, learning_rate, batch_size, config);
 	// net.saveToFile(mnist_file);
 
+	// Perceptron net("mnist_weights/mnist_epoch120_lr2_b1000_config512.128_runtime478");
+	// mnist_test(net);
 
-	// Perceptron net("mnist_weights/test");
+
+	// std::cout << "W_1:\n" << net.getWeights(0) << '\n';
+	// std::cout << "b_1: " << net.getBiases(0) << "\n\n";
+
+	// std::cout << "W_2:\n" << net.getWeights(1) << '\n';
+	// std::cout << "b_2: " << net.getBiases(1) << "\n\n";
+
+	// std::cout << "W_2:\n" << net.getWeights(2) << '\n';
+	// std::cout << "b_2: " << net.getBiases(2) << '\n';
+
 	// mnist_test(net);
 
 
@@ -340,5 +351,3 @@ int main()
 	// 	example_stats(net, values, k);
 	// }
 }
-
-

@@ -1,4 +1,4 @@
-FLAGS= -std=c++17 -O3 -march=native -ffast-math -flto -Wextra -Wall
+FLAGS= -std=c++17 -march=native -ffast-math -flto -Wextra -Wall
 
 .PHONY: all clean
 
