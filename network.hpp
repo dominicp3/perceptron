@@ -21,21 +21,21 @@ struct Layer
 	/*
 		forward pass space
 	*/
-	std::vector<double> input; // input from previous layer's activation
+	std::vector<float> input; // input from previous layer's activation
 
 	Matrix W; // weight matrix
-	std::vector<double> b; // bias vector
+	std::vector<float> b; // bias vector
 
-	std::vector<double> z; // affine output
-	std::vector<double> a; // activation vector
+	std::vector<float> z; // affine output
+	std::vector<float> a; // activation vector
 
 	/*
 		backpropagation space
 	*/
-	std::vector<double> delta; // error vector
+	std::vector<float> delta; // error vector
 
 	Matrix Wg; // accumulator matrix to hold weight gradient
-	std::vector<double> bg; // accumulator vector to hold bias gradient
+	std::vector<float> bg; // accumulator vector to hold bias gradient
 };
 
 /*
@@ -56,25 +56,25 @@ public:
 	*/
 	Perceptron(const std::string &file);
 
-	void fit(const std::vector<std::vector<double>> &X, const std::vector<int> &y, int epochs = 2, double learning_rate=0.01, int batch_size = 1);
+	void fit(const std::vector<std::vector<float>> &X, const std::vector<int> &y, int epochs = 2, float learning_rate=0.01, int batch_size = 1);
 
 	/* forward pass through the network */
-	void forward(const std::vector<double> &x);
+	void forward(const std::vector<float> &x);
 
-	int predict(const std::vector<double> &x);
+	int predict(const std::vector<float> &x);
 
-	const std::vector<double> probabilities(const std::vector<double> &x);
+	const std::vector<float> probabilities(const std::vector<float> &x);
 
-	const std::vector<double> logits(const std::vector<double> &x);
+	const std::vector<float> logits(const std::vector<float> &x);
 
 	/* loss per example */
-	double loss(const std::vector<double> &x, int k);
+	float loss(const std::vector<float> &x, int k);
 
 	/* update the accumulators */
-	double backpropagate(const std::vector<double> &x, int k);
+	float backpropagate(const std::vector<float> &x, int k);
 
 	/* use the accumulated gradients to update weights, gradient descent */
-	void applyWeights(double alpha);
+	void applyWeights(float alpha);
 
 	/* zero out the accumulators to ready for next update */
 	void clearGradients();
@@ -84,11 +84,11 @@ public:
 	bool equalParams(const Perceptron &other) const;
 	const Layer &getLayer(int layer) const;
 	const Matrix &getWeights(int layer) const;
-	const std::vector<double> &getBiases(int layer) const;
+	const std::vector<float> &getBiases(int layer) const;
 	int numLayers() const;
 
 private:
-	std::vector<double> softmax(const std::vector<double> &x);
+	std::vector<float> softmax(const std::vector<float> &x);
 
 	void backward(int k);
 

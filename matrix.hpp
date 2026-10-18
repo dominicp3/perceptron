@@ -7,21 +7,21 @@
 class Matrix
 {
 public:
-	Matrix(int n_rows, int m_cols, double value = 0.0);
-	Matrix(std::initializer_list<std::initializer_list<double>> rows);
-	Matrix(int n_rows, int m_cols, std::vector<double> &&arr);
+	Matrix(int n_rows, int m_cols, float value = 0.0);
+	Matrix(std::initializer_list<std::initializer_list<float>> rows);
+	Matrix(int n_rows, int m_cols, std::vector<float> &&arr);
 
 	static Matrix identity(int n);
-	static Matrix random(int n_rows, int m_cols, double lo=-1.0, double hi=1.0);
+	static Matrix random(int n_rows, int m_cols, float lo=-1.0, float hi=1.0);
 
 	int numRows() const;
 	int numCols() const;
 	std::pair<int, int> shape() const;
 
-	const double *data() const;
+	const float *data() const;
 
-	double operator()(int i, int j) const;
-	double& operator()(int i, int j);
+	float operator()(int i, int j) const;
+	float& operator()(int i, int j);
 
 	Matrix operator+(const Matrix &other) const;
 	Matrix &operator+=(const Matrix &other);
@@ -29,15 +29,15 @@ public:
 	Matrix operator-(const Matrix &other) const;
 	Matrix &operator-=(const Matrix &other);
 
-	Matrix operator*(double lambda) const;
+	Matrix operator*(float lambda) const;
 	Matrix operator*(const Matrix &other) const;
-	std::vector<double> operator*(const std::vector<double> &x) const;
+	std::vector<float> operator*(const std::vector<float> &x) const;
 
-	Matrix &operator*=(double lambda);
+	Matrix &operator*=(float lambda);
 
-	Matrix operator/(double lambda) const;
+	Matrix operator/(float lambda) const;
 
-	Matrix &operator/=(double lambda);
+	Matrix &operator/=(float lambda);
 
 	bool operator==(const Matrix &other) const;
 
@@ -48,22 +48,22 @@ public:
 	void zero();
 
 	/* affine transform performs Mx + b */
-	void affineTransform(const std::vector<double> &x, const std::vector<double> &b, std::vector<double> &out) const;
+	void affineTransform(const std::vector<float> &x, const std::vector<float> &b, std::vector<float> &out) const;
 
 	/* computes W^T x and puts it in out */
-	void transposeProduct(const std::vector<double> &x, std::vector<double> &out) const;
+	void transposeProduct(const std::vector<float> &x, std::vector<float> &out) const;
 
 	/* computes M += lambda * m */
-	void addScaled(double lambda, const Matrix &m);
+	void addScaled(float lambda, const Matrix &m);
 
 	/* computes M += a (outer prod) b */
-	void addOuter(const std::vector<double> &a, const std::vector<double> &b);
+	void addOuter(const std::vector<float> &a, const std::vector<float> &b);
 
-	friend Matrix operator*(double lambda, const Matrix &m);
-	friend std::vector<double> operator*(const std::vector<double> &x, const Matrix &m);
+	friend Matrix operator*(float lambda, const Matrix &m);
+	friend std::vector<float> operator*(const std::vector<float> &x, const Matrix &m);
 	friend std::ostream &operator<<(std::ostream &os, const Matrix &m);
 
 private:
 	int rows_, cols_;
-	std::vector<double> arr_;
+	std::vector<float> arr_;
 };

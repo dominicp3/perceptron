@@ -1,4 +1,4 @@
-double relu(double x)
+float relu(float x)
 {
 	if (x > 0.0) {
 		return x;
@@ -7,7 +7,7 @@ double relu(double x)
 	return 0.0;
 }
 
-double dRelu(double x)
+float dRelu(float x)
 {
 	if (x > 0.0) {
 		return 1.0;

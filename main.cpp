@@ -29,7 +29,7 @@ namespace {
 	}
 }
 
-std::vector<std::vector<double>> loadImages(const std::string &path)
+std::vector<std::vector<float>> loadImages(const std::string &path)
 {
 	std::ifstream f(path, std::ios::binary);
 	if (!f) {
@@ -45,7 +45,7 @@ std::vector<std::vector<double>> loadImages(const std::string &path)
 	std::uint32_t cols = readU32(f);
 	std::size_t size = static_cast<std::size_t>(rows) * cols;
 
-	std::vector<std::vector<double>> images(count, std::vector<double>(size));
+	std::vector<std::vector<float>> images(count, std::vector<float>(size));
 	std::vector<unsigned char> buf(size);
 
 	for (std::uint32_t n = 0; n < count; ++n) {
@@ -83,26 +83,9 @@ std::vector<int> loadLabels(const std::string &path)
 	return std::vector<int>(buf.begin(), buf.end());
 }
 
-Dataset gaussian_blob(int n)
-{
-	std::random_device rd;
-	std::mt19937_64 rng(rd());
-	std::normal_distribution<double> noise(0.0, 0.5);   // sigma = 0.5
-
-	std::vector<std::vector<double>> xs;
-	std::vector<int> ks;
-	for (int i = 0; i < n; ++i) {
-		xs.push_back({-1.0 + noise(rng), -1.0 + noise(rng)});  ks.push_back(0);
-		xs.push_back({ 1.0 + noise(rng),  1.0 + noise(rng)});  ks.push_back(1);
-		xs.push_back({ -1.0 + noise(rng),  1.0 + noise(rng)});  ks.push_back(2);
-	}
-
-	return {xs, ks, 3};
-}
-
 Dataset xor_set()
 {
-	std::vector<std::vector<double>> dataset {
+	std::vector<std::vector<float>> dataset {
 		{0, 0},
 		{0, 1},
 		{1, 0},
@@ -114,9 +97,9 @@ Dataset xor_set()
 	return {dataset, labels, 2};
 }
 
-int floor_inner(const std::vector<double> &a, const std::vector<double> &b)
+int floor_inner(const std::vector<float> &a, const std::vector<float> &b)
 {
-	double x = 0.0;
+	float x = 0.0;
 
 	for (std::size_t i = 0; i < a.size(); ++i) {
 		x += a[i] * b[i];
@@ -128,21 +111,21 @@ int floor_inner(const std::vector<double> &a, const std::vector<double> &b)
 Dataset generate_data(int data_size)
 {
 	Dataset d {
-		std::vector<std::vector<double>>(data_size),
+		std::vector<std::vector<float>>(data_size),
 		std::vector<int>(data_size),
 		10
 	};
 
-	std::vector<double> ones(10, 1.0);
+	std::vector<float> ones(10, 1.0);
 
 	std::mt19937_64 rng(rd());
 
         for (int i = 0; i < data_size; i++) {
-		std::uniform_real_distribution<double> dist(0.0, 1.0);
+		std::uniform_real_distribution<float> dist(0.0, 1.0);
 
-		std::vector<double> v(10);
+		std::vector<float> v(10);
 
-		for (double &k : v) {
+		for (float &k : v) {
 			k = dist(rng);
 		}
 
@@ -153,7 +136,7 @@ Dataset generate_data(int data_size)
         return d;
 }
 
-void train(Perceptron &net, const Dataset &d, int batch_size, double lr, int epochs)
+void train(Perceptron &net, const Dataset &d, int batch_size, float lr, int epochs)
 {
 	const auto &[X, y, num_classes] = d;
 	
@@ -181,20 +164,20 @@ void train(Perceptron &net, const Dataset &d, int batch_size, double lr, int epo
 	}
 }
 
-void example_stats(Perceptron &net, const std::vector<double> &x, int k)
+void example_stats(Perceptron &net, const std::vector<float> &x, int k)
 {
 	std::cout << "probs: " << net.probabilities(x) << ", ";
 	std::cout << "pred: " << net.predict(x) << ", ";
 	std::cout << "true: " << k << "\n";
 }
 
-double test(Perceptron &net, const Dataset &d)
+float test(Perceptron &net, const Dataset &d)
 {
 	const auto &[X, y, num_classes] = d;
 
 	int dataset_size = (int) d.X.size();
 
-	double hits = 0.0;
+	float hits = 0.0;
 
 	for (int i = 0; i < dataset_size; ++i) {
 
@@ -219,7 +202,7 @@ void fuck()
 	Perceptron net(10, 10, {128, 128}, {relu, dRelu});
 
 	train(net, d_train, 100, 0.5, 3);
-	double hit_rate = test(net, d_test);
+	float hit_rate = test(net, d_test);
 
 	std::cout << "hit rate: " << 100 * hit_rate << '%' << '\n';
 }
@@ -242,7 +225,7 @@ Dataset mnist_testset()
 	};
 }
 
-Perceptron mnist_train(int epochs, double lr, int b, const std::vector<int> &config)
+Perceptron mnist_train(int epochs, float lr, int b, const std::vector<int> &config)
 {
 	auto [X_mnist_train, y_mnist_train, n_classes_mnist_train] = mnist_trainset();
 
@@ -256,11 +239,11 @@ Perceptron mnist_train(int epochs, double lr, int b, const std::vector<int> &con
 void mnist_test(Perceptron &net)
 {
 	auto [X_mnist_test, y_mnist_test, n_classes_mnist_test] = mnist_testset();
-	double hit_rate = test(net, {X_mnist_test, y_mnist_test, n_classes_mnist_test});
+	float hit_rate = test(net, {X_mnist_test, y_mnist_test, n_classes_mnist_test});
 	std::cout << "hit rate: " << 100 * hit_rate << '%' << '\n';
 }
 
-std::vector<double> mnist_single(std::string filename)
+std::vector<float> mnist_single(std::string filename)
 {
 	std::ifstream file(filename);
 
@@ -268,8 +251,8 @@ std::vector<double> mnist_single(std::string filename)
 		std::cerr << "Failed to open pixels.txt\n";
 	}
 
-	std::vector<double> pixels;
-	double value;
+	std::vector<float> pixels;
+	float value;
 
 	while (file >> value) {
 		pixels.push_back(value);
@@ -287,20 +270,15 @@ std::vector<double> mnist_single(std::string filename)
 int main()
 {
 	// int epochs = 20;
-	// double learning_rate = 0.005;
+	// float learning_rate = 0.005;
 	// int batch_size = 64;
 	// std::vector<int> config {256, 256};
-	// std::string mnist_file = "mnist_weights";
+	// std::string mnist_file = "mnist_weights/test";
 	// Perceptron net = mnist_train(epochs, learning_rate, batch_size, config);
 	// net.saveToFile(mnist_file);
 
 
-
-	// Perceptron net("mnist_weights");
-	// mnist_test(net);
-
-
-
+	// Perceptron net("mnist_weights/test");
 	// mnist_test(net);
 
 
@@ -315,8 +293,8 @@ int main()
 	// 	digit_file += ".png.txt";
 
 	// 	std::ifstream file(digit_file);
-	// 	std::vector<double> values;
-	// 	double x;
+	// 	std::vector<float> values;
+	// 	float x;
 
 	// 	while (file >> x) {
 	// 		values.push_back(x);
@@ -333,8 +311,8 @@ int main()
 	// 	digit_file += ".png.txt";
 
 	// 	std::ifstream file(digit_file);
-	// 	std::vector<double> values;
-	// 	double x;
+	// 	std::vector<float> values;
+	// 	float x;
 
 	// 	while (file >> x) {
 	// 		values.push_back(x);
@@ -352,8 +330,8 @@ int main()
 	// 	digit_file += ".png.txt";
 
 	// 	std::ifstream file(digit_file);
-	// 	std::vector<double> values;
-	// 	double x;
+	// 	std::vector<float> values;
+	// 	float x;
 
 	// 	while (file >> x) {
 	// 		values.push_back(x);

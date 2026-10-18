@@ -5,9 +5,9 @@
 */
 struct Activation
 {
-	double (*f)(double);
-	double (*df)(double);
+	float (*f)(float);
+	float (*df)(float);
 };
 
-double relu(double x);
-double dRelu(double x);
+float relu(float x);
+float dRelu(float x);

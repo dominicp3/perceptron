@@ -9,12 +9,12 @@ namespace {
 	std::mt19937_64 gen(rd());
 }
 
-Matrix::Matrix(int n_rows, int m_cols, double value):
+Matrix::Matrix(int n_rows, int m_cols, float value):
 	rows_{n_rows},
 	cols_{m_cols},
 	arr_(n_rows * m_cols, value) {}
 
-Matrix::Matrix(std::initializer_list<std::initializer_list<double>> rows)
+Matrix::Matrix(std::initializer_list<std::initializer_list<float>> rows)
 {
 	if (rows.size() == 0) {
 		throw std::invalid_argument("Matrix cannot be empty");
@@ -25,7 +25,7 @@ Matrix::Matrix(std::initializer_list<std::initializer_list<double>> rows)
 
 	rows_ = n_rows;
 	cols_ = n_cols;
-	arr_ = std::vector<double>(n_rows * n_cols);
+	arr_ = std::vector<float>(n_rows * n_cols);
 
 	std::size_t i = 0;
 	for (const auto &row : rows) {
@@ -35,7 +35,7 @@ Matrix::Matrix(std::initializer_list<std::initializer_list<double>> rows)
 		}
 
 		std::size_t j = 0;
-		for (double entry : row) {
+		for (float entry : row) {
 			arr_[i * n_cols + j] = entry;
 			++j;
 		}
@@ -44,7 +44,7 @@ Matrix::Matrix(std::initializer_list<std::initializer_list<double>> rows)
 	}
 }
 
-Matrix::Matrix(int n_rows, int m_cols, std::vector<double> &&arr)
+Matrix::Matrix(int n_rows, int m_cols, std::vector<float> &&arr)
 {
 	if (n_rows * m_cols != (int) arr.size()) {
 		throw std::invalid_argument("arr doesn't match given dimensions");
@@ -67,13 +67,13 @@ Matrix Matrix::identity(int n)
 	return m;
 }
 
-Matrix Matrix::random(int n_rows, int m_cols, double lo, double hi)
+Matrix Matrix::random(int n_rows, int m_cols, float lo, float hi)
 {
 	Matrix m(n_rows, m_cols);
 
-	std::uniform_real_distribution<double> dist(lo, hi);
+	std::uniform_real_distribution<float> dist(lo, hi);
 
-	for (double &x : m.arr_) {
+	for (float &x : m.arr_) {
 		x = dist(gen);
 	}
 
@@ -95,17 +95,17 @@ std::pair<int, int> Matrix::shape() const
 	return {rows_, cols_};
 }
 
-const double *Matrix::data() const
+const float *Matrix::data() const
 {
 	return arr_.data();
 }
 
-double Matrix::operator()(int i, int j) const
+float Matrix::operator()(int i, int j) const
 {
 	return arr_[i * cols_ + j];
 }
 
-double& Matrix::operator()(int i, int j)
+float& Matrix::operator()(int i, int j)
 {
 	return arr_[i * cols_ + j];
 }
@@ -117,7 +117,7 @@ Matrix Matrix::operator+(const Matrix &other) const
         }
 	
 	Matrix m(rows_, cols_);
-	std::transform(arr_.begin(), arr_.end(), other.arr_.begin(), m.arr_.begin(), std::plus<double>());
+	std::transform(arr_.begin(), arr_.end(), other.arr_.begin(), m.arr_.begin(), std::plus<float>());
 
 	return m;
 }
@@ -128,7 +128,7 @@ Matrix &Matrix::operator+=(const Matrix &other)
 		throw std::invalid_argument("dimension mismatch");
         }
 
-	std::transform(arr_.begin(), arr_.end(), other.arr_.begin(), arr_.begin(), std::plus<double>());
+	std::transform(arr_.begin(), arr_.end(), other.arr_.begin(), arr_.begin(), std::plus<float>());
 
 	return *this;
 }
@@ -140,7 +140,7 @@ Matrix Matrix::operator-(const Matrix &other) const
         }
 
 	Matrix m(rows_, cols_);
-	std::transform(arr_.begin(), arr_.end(), other.arr_.begin(), m.arr_.begin(), std::minus<double>());
+	std::transform(arr_.begin(), arr_.end(), other.arr_.begin(), m.arr_.begin(), std::minus<float>());
 	return m;
 }
 
@@ -150,14 +150,14 @@ Matrix &Matrix::operator-=(const Matrix &other)
 		throw std::invalid_argument("dimension mismatch");
         }
 
-	std::transform(arr_.begin(), arr_.end(), other.arr_.begin(), arr_.begin(), std::minus<double>());
+	std::transform(arr_.begin(), arr_.end(), other.arr_.begin(), arr_.begin(), std::minus<float>());
 	return *this;
 }
 
-Matrix Matrix::operator*(double lambda) const
+Matrix Matrix::operator*(float lambda) const
 {
 	Matrix m(rows_, cols_);
-	std::transform(arr_.begin(), arr_.end(), m.arr_.begin(), [lambda](double e) { return lambda * e; });
+	std::transform(arr_.begin(), arr_.end(), m.arr_.begin(), [lambda](float e) { return lambda * e; });
 	return m;
 }
 
@@ -171,7 +171,7 @@ Matrix Matrix::operator*(const Matrix &other) const
 
 	for (int i = 0; i < rows_; i++) {
 		for (int k = 0; k < cols_; k++) {
-			double r = arr_[i * cols_ + k];
+			float r = arr_[i * cols_ + k];
 			for (int j = 0; j < other.cols_; j++) {
 				m.arr_[i * m.cols_ + j] += r * other.arr_[k * other.cols_ + j];
 			}
@@ -181,16 +181,16 @@ Matrix Matrix::operator*(const Matrix &other) const
 	return m;
 }
 
-std::vector<double> Matrix::operator*(const std::vector<double> &x) const
+std::vector<float> Matrix::operator*(const std::vector<float> &x) const
 {
 	if (cols_ != (int) x.size()) {
 		throw std::invalid_argument("dimension mismatch");
 	}
 
-	std::vector<double> y(rows_);
+	std::vector<float> y(rows_);
 
 	for (int i = 0; i < rows_; ++i) {
-		double e = 0.0;
+		float e = 0.0;
 		for (int j = 0; j < cols_; ++j) {
 			e += arr_[i * cols_ + j] * x[j];
 		}
@@ -200,22 +200,22 @@ std::vector<double> Matrix::operator*(const std::vector<double> &x) const
 	return y;
 }
 
-Matrix &Matrix::operator*=(double lambda)
+Matrix &Matrix::operator*=(float lambda)
 {
-	std::transform(arr_.begin(), arr_.end(), arr_.begin(), [lambda](double e) { return lambda * e; });
+	std::transform(arr_.begin(), arr_.end(), arr_.begin(), [lambda](float e) { return lambda * e; });
 	return *this;
 }
 
-Matrix Matrix::operator/(double lambda) const
+Matrix Matrix::operator/(float lambda) const
 {
 	Matrix m(rows_, cols_);
-	std::transform(arr_.begin(), arr_.end(), m.arr_.begin(), [lambda](double e) { return e / lambda; });
+	std::transform(arr_.begin(), arr_.end(), m.arr_.begin(), [lambda](float e) { return e / lambda; });
 	return m;
 }
 
-Matrix &Matrix::operator/=(double lambda)
+Matrix &Matrix::operator/=(float lambda)
 {
-	std::transform(arr_.begin(), arr_.end(), arr_.begin(), [lambda](double e) { return e / lambda; });
+	std::transform(arr_.begin(), arr_.end(), arr_.begin(), [lambda](float e) { return e / lambda; });
 	return *this;
 }
 
@@ -247,14 +247,14 @@ void Matrix::zero()
 	std::fill(arr_.begin(), arr_.end(), 0.0);
 }
 
-void Matrix::affineTransform(const std::vector<double> &x, const std::vector<double> &b, std::vector<double> &out) const
+void Matrix::affineTransform(const std::vector<float> &x, const std::vector<float> &b, std::vector<float> &out) const
 {
 	if (cols_ != (int) x.size() || rows_ != (int) b.size() || rows_ != (int) out.size()) {
 		throw std::invalid_argument("dimension mismatch");
 	}
 
 	for (int i = 0; i < rows_; ++i) {
-		double e = 0.0;
+		float e = 0.0;
 		for (int j = 0; j < cols_; ++j) {
 			e += arr_[i * cols_ + j] * x[j];
 		}
@@ -262,7 +262,7 @@ void Matrix::affineTransform(const std::vector<double> &x, const std::vector<dou
 	}
 }
 
-void Matrix::transposeProduct(const std::vector<double> &x, std::vector<double> &out) const
+void Matrix::transposeProduct(const std::vector<float> &x, std::vector<float> &out) const
 {
 	if (rows_ != (int) x.size() || cols_ != (int) out.size()) {
 		throw std::invalid_argument("dimension mismatch");
@@ -271,14 +271,14 @@ void Matrix::transposeProduct(const std::vector<double> &x, std::vector<double> 
 	std::fill(out.begin(), out.end(), 0.0);
 
 	for (int i = 0; i < rows_; ++i) {
-		double r = x[i];
+		float r = x[i];
 		for (int j = 0; j < cols_; ++j) {
 			out[j] += arr_[i * cols_ + j] * r;
 		}
 	}
 }
 
-void Matrix::addScaled(double lambda, const Matrix &m)
+void Matrix::addScaled(float lambda, const Matrix &m)
 {
 	if (m.rows_ != rows_ || m.cols_ != cols_) {
 		throw std::invalid_argument("dimension mismatch");
@@ -289,7 +289,7 @@ void Matrix::addScaled(double lambda, const Matrix &m)
 	}
 }
 
-void Matrix::addOuter(const std::vector<double> &a, const std::vector<double> &b)
+void Matrix::addOuter(const std::vector<float> &a, const std::vector<float> &b)
 {
 	if ((int) a.size() != rows_ || (int) b.size() != cols_) {
 		throw std::invalid_argument("dimension mismatch");
@@ -305,21 +305,21 @@ void Matrix::addOuter(const std::vector<double> &a, const std::vector<double> &b
 	}
 }
 
-Matrix operator*(double lambda, const Matrix &m)
+Matrix operator*(float lambda, const Matrix &m)
 {
 	return m * lambda;
 }
 
-std::vector<double> operator*(const std::vector<double> &x, const Matrix &m)
+std::vector<float> operator*(const std::vector<float> &x, const Matrix &m)
 {
 	if (m.rows_ != (int) x.size()) {
 		throw std::invalid_argument("dimension mismatch");
 	}
 
-	std::vector<double> y(m.cols_, 0.0);
+	std::vector<float> y(m.cols_, 0.0);
 
 	for (int i = 0; i < m.rows_; ++i) {
-		double xi = x[i];
+		float xi = x[i];
 		for (int j = 0; j < m.cols_; ++j) {
 			y[j] += m.arr_[i * m.cols_ + j] * xi;
 		}

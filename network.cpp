@@ -52,13 +52,13 @@ Perceptron::Perceptron(const std::string &file)
 
 		sz = rows * cols;
 
-		std::vector<double> W_arr(sz);
-		in.read(reinterpret_cast<char*>(W_arr.data()), sz * sizeof (double));
+		std::vector<float> W_arr(sz);
+		in.read(reinterpret_cast<char*>(W_arr.data()), sz * sizeof (float));
 
 		Matrix W(rows, cols, std::move(W_arr));
 
-		std::vector<double> b(rows);
-		in.read(reinterpret_cast<char*>(b.data()), rows * sizeof (double));
+		std::vector<float> b(rows);
+		in.read(reinterpret_cast<char*>(b.data()), rows * sizeof (float));
 
 		Layer layer(cols, rows);
 		layer.W = std::move(W);
@@ -77,7 +77,7 @@ Perceptron::Perceptron(const std::string &file)
 	layers_ = std::move(layers);
 }
 
-void Perceptron::fit(const std::vector<std::vector<double>> &X, const std::vector<int> &y, int epochs, double learning_rate, int batch_size)
+void Perceptron::fit(const std::vector<std::vector<float>> &X, const std::vector<int> &y, int epochs, float learning_rate, int batch_size)
 {
 	if (X.size() != y.size()) {
 		throw std::invalid_argument("fit: X and y have different sizes");
@@ -106,7 +106,7 @@ void Perceptron::fit(const std::vector<std::vector<double>> &X, const std::vecto
 	}
 }
 
-void Perceptron::forward(const std::vector<double> &x)
+void Perceptron::forward(const std::vector<float> &x)
 {
 	layers_.front().input = x;
 
@@ -127,25 +127,25 @@ void Perceptron::forward(const std::vector<double> &x)
 	last_it->W.affineTransform(last_it->input, last_it->b, last_it->z);
 }
 
-int Perceptron::predict(const std::vector<double> &x)
+int Perceptron::predict(const std::vector<float> &x)
 {
 	forward(x);
 	return std::max_element(layers_.back().z.begin(), layers_.back().z.end()) - layers_.back().z.begin();
 }
 
-const std::vector<double> Perceptron::probabilities(const std::vector<double> &x)
+const std::vector<float> Perceptron::probabilities(const std::vector<float> &x)
 {
 	forward(x);
 	return softmax(layers_.back().z);
 }
 
-const std::vector<double> Perceptron::logits(const std::vector<double> &x)
+const std::vector<float> Perceptron::logits(const std::vector<float> &x)
 {
 	forward(x);
 	return layers_.back().z;
 }
 
-double Perceptron::loss(const std::vector<double> &x, int k)
+float Perceptron::loss(const std::vector<float> &x, int k)
 {
 	if (k < 0 || k >= m_output) {
 		throw std::invalid_argument("loss: k invalid index");
@@ -155,7 +155,7 @@ double Perceptron::loss(const std::vector<double> &x, int k)
 	return crossEntropy(layers_.back().z, k);
 }
 
-double Perceptron::backpropagate(const std::vector<double> &x, int k)
+float Perceptron::backpropagate(const std::vector<float> &x, int k)
 {
 	if ((int) x.size() != n_input || k < 0 || k >= m_output) {
 		throw std::invalid_argument("backpropagate: k invalid index");
@@ -167,7 +167,7 @@ double Perceptron::backpropagate(const std::vector<double> &x, int k)
 	return crossEntropy(layers_.back().z, k);
 }
 
-void Perceptron::applyWeights(double alpha)
+void Perceptron::applyWeights(float alpha)
 {
 	for (Layer &layer : layers_) {
 		/* perform W += alpha * Wg */
@@ -242,7 +242,7 @@ const Matrix &Perceptron::getWeights(int layer) const
 {
 	return layers_.at(layer).W;
 }
-const std::vector<double> &Perceptron::getBiases(int layer) const
+const std::vector<float> &Perceptron::getBiases(int layer) const
 {
 	return layers_.at(layer).b;
 }
@@ -252,19 +252,19 @@ int Perceptron::numLayers() const
 	return (int) layers_.size();
 }
 
-std::vector<double> Perceptron::softmax(const std::vector<double>& x)
+std::vector<float> Perceptron::softmax(const std::vector<float>& x)
 {
-	std::vector<double> p(x.size());
+	std::vector<float> p(x.size());
 
-	double m = *std::max_element(x.begin(), x.end());
+	float m = *std::max_element(x.begin(), x.end());
 
-	double d = 0.0;
+	float d = 0.0;
 	for (std::size_t i = 0; i < x.size(); ++i) {
 		p[i] = std::exp(x[i] - m);
 		d += p[i];
 	}
 
-	for (double &v : p) {
+	for (float &v : p) {
 		v /= d;
 	}
 

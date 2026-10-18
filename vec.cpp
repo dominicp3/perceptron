@@ -3,7 +3,7 @@
 #include <cmath>
 #include <algorithm>
 
-std::vector<double> &operator+=(std::vector<double> &a, const std::vector<double> &b)
+std::vector<float> &operator+=(std::vector<float> &a, const std::vector<float> &b)
 {
 	if (a.size() != b.size()) {
 		throw std::invalid_argument("vector sizes differ");
@@ -16,7 +16,7 @@ std::vector<double> &operator+=(std::vector<double> &a, const std::vector<double
 	return a;
 }
 
-std::vector<double> &addScaled(std::vector<double> &a, const std::vector<double> &b, double lambda)
+std::vector<float> &addScaled(std::vector<float> &a, const std::vector<float> &b, float lambda)
 {
 	if (a.size() != b.size()) {
 		throw std::invalid_argument("vector sizes differ");
@@ -29,7 +29,7 @@ std::vector<double> &addScaled(std::vector<double> &a, const std::vector<double>
 	return a;
 }
 
-std::vector<double> &hadamardInplace(std::vector<double> &a, const std::vector<double> &b)
+std::vector<float> &hadamardInplace(std::vector<float> &a, const std::vector<float> &b)
 {
 	if (a.size() != b.size()) {
 		throw std::invalid_argument("vector sizes differ");
@@ -42,22 +42,22 @@ std::vector<double> &hadamardInplace(std::vector<double> &a, const std::vector<d
 	return a;
 }
 
-double crossEntropy(const std::vector<double> &z, int k)
+float crossEntropy(const std::vector<float> &z, int k)
 {
 	if (k < 0 || k >= (int) z.size()) {
 		throw std::invalid_argument("crossEntropy: invalid k");
 	}
 
-	double m = *std::max_element(z.begin(), z.end());
-	double s = 0.0;
-	for (double v : z) {
+	float m = *std::max_element(z.begin(), z.end());
+	float s = 0.0;
+	for (float v : z) {
 		s += std::exp(v - m);
 	}
 
 	return -z[k] + m + std::log(s);
 }
 
-std::ostream &operator<<(std::ostream &os, const std::vector<double> &v)
+std::ostream &operator<<(std::ostream &os, const std::vector<float> &v)
 {
 	os << '[';
 
